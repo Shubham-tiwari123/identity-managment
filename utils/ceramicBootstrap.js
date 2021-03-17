@@ -22,33 +22,67 @@ const ProfileSchema = {
         "type": "string",
         "title": "email",
         "maxLength": 150
+      },
+      "description": {
+        "type": "string",
+        "title": "description",
+      },
+      "phoneNumber": {
+        "type": "string",
+        "title": "phoneNumber",
+      },
+      "location": {
+        "type": "string",
+        "title": "location",
+      },
+      "website": {
+        "type": "string",
+        "title": "website"
+      },
+      "birthdate": {
+        "type": "string",
+        "title": "birthdate",
+      },
+      "verifiables": {
+        "type": "object",
+        "title": "verifiables",
+        "properties":{
+          "github": {
+            "type": "object",
+            "title": "github",
+            "properties":{
+              "username": {
+                "type": "string",
+                "title": "username",
+              },
+              "githubVerified": {
+                "type": "boolean",
+                "title": "githubVerified",
+              },
+            }
+          },
+          "twitter": {
+            "type": "object",
+            "title": "twitter",
+            "properties":{
+              "username": {
+                "type": "string",
+                "title": "username",
+              },
+              "twitterVerified": {
+                "type": "boolean",
+                "title": "twitterVerified",
+              },
+            }
+          }
+        }
+      },
+      "experience": {
+        "type": "array",
+        "title": "experience"
       }
     }
   }
-
-  const EncryptionKeySchema = {
-    doctype: 'object',
-    title: 'Encryption Key',
-    $schema: 'http://json-schema.org/draft-07/schema#',
-    properties: {
-      key: {
-        type: 'object',
-        title: 'key'
-      }
-    },
-  }
-
-const PortfolioSchema = {
-    doctype: 'object',
-    title: 'Portfolio List',
-    $schema: 'http://json-schema.org/draft-07/schema#',
-    properties: {
-      portfolio: {
-        type: 'string',
-        title: 'portfolio',
-      },
-    },
-  };
 
 async function run() {
   // The seed must be provided as an environment variable
@@ -61,16 +95,11 @@ async function run() {
   await ceramic.setDIDProvider(new Ed25519Provider(seed))
 
   // Publish the two schemas
-  const [profile, encryptionKey, portfolio] = await Promise.all([
-    publishSchema(ceramic, { content: ProfileSchema }),
-    publishSchema(ceramic, {content: EncryptionKeySchema}),
-    publishSchema(ceramic, { content: PortfolioSchema }),
+  const [profile] = await Promise.all([
+    publishSchema(ceramic, { content: ProfileSchema })
   ])
 
   console.log("Profile Schema", profile)
-  console.log("Portfolio Schema", portfolio)
-  console.log("Encryption Schema", encryptionKey)
-
 
   // Create the definition using the created schema ID
   const profileDefinition = await createDefinition(ceramic, {
@@ -78,30 +107,13 @@ async function run() {
     description: 'Profile Schema',
     schema: profile.commitId.toUrl(),
   })
-
-  const portfolioDefinition = await createDefinition(ceramic, {
-    name: 'Portfolio',
-    description: 'Portfolio Schema',
-    schema: portfolio.commitId.toUrl(),
-  })
-
-  const encryptionDefinition = await createDefinition(ceramic, {
-    name: 'Encryption',
-    description: 'Encryption Schema',
-    schema: encryptionKey.commitId.toUrl(),
-  })
-
   // Write config to JSON file
   const config = {
     definitions: {
       profile: profileDefinition.id.toString(),
-      portfolio: portfolioDefinition.id.toString(),
-      encryptionKey: encryptionDefinition.id.toString()
     },
     schemas: {
       profile: profile.commitId.toUrl(),
-      portfolio: portfolio.commitId.toUrl(),
-      encryptionKey: encryptionKey.commitId.toUrl()
     },
   }
   await writeFile('./config.json', JSON.stringify(config))
