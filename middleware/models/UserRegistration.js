@@ -12,12 +12,26 @@ const UserRegistration = {
         location: {type: 'string'},
         website: {type: 'string'},
         birthdate: {type: 'string'},
-        github: {type: 'string'},
-        githubVerifiedStatus: {type: 'boolean'},
-        twitter: {type: 'string'},
-        twitterVerifiedStatus: {type: 'boolean'},
-        employer: {type: 'string'},
-        jobTitle: {type: 'string'}
+        verifiables: {
+            type: 'object',
+            properties:{
+                github: {
+                    type: "object",
+                    properties:{
+                        username: {type: "string"},
+                        githubVerified: {type: "boolean"},
+                    }
+                },
+                twitter: {
+                    type: "object",
+                    properties:{
+                        username: {type: "string"},
+                        twitterVerified: {type: "boolean"},
+                    }
+                }
+            }
+        },
+        experience: {type: "array"}
     },
 }
 
